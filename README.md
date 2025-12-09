@@ -58,6 +58,7 @@ miEAA3_mcp/
         └── mieaa.ts
 
 
+
 ## miEAA MCP Server — API Usage Summary
 The miEAA MCP Server automates microRNA enrichment analysis using the official REST API provided by the miRNA Enrichment Analysis and Annotation Tool (miEAA), hosted by Saarland University. This tool does not use scraping and relies only on documented API endpoints.
 
