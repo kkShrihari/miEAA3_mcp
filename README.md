@@ -173,5 +173,6 @@ zip -r mieaa3_mcp.dxt manifest.json package.json package-lock.json tsconfig.json
 ## 🚧 Current Status
 
 Claude temporarily unavailable — API disruptions observed.
+<img width="867" height="688" alt="image" src="https://github.com/user-attachments/assets/5be001da-2176-4770-8c0c-11ee3a6cd3c7" />
 
 ---
