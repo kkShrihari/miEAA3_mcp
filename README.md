@@ -22,7 +22,6 @@ npm install downloads all necessary dependencies from package.json
 
 
 ## File strucutre
-
 miEAA3_mcp/
 ├── README.md
 ├── package.json
@@ -56,7 +55,6 @@ miEAA3_mcp/
     │   └── mieaa_precursor_handler.ts
     └── utils/
         └── mieaa.ts
-
 
 
 ## miEAA MCP Server — API Usage Summary
