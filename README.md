@@ -163,16 +163,25 @@ npx @modelcontextprotocol/inspector
 ---
 
 ## 📦 Packaging for Claude
-
 ```bash
-zip -r mieaa3_mcp.dxt manifest.json package.json package-lock.json tsconfig.json src/
+zip -r mieaa3_mcp.dxt manifest.json package.json package-lock.json tsconfig.json dist/
+cp /home/shrihari/miEAA3_mcp/miEAA3_mcp.dxt /mnt/c/Users/ASUS/Downloads/mcp/
 ```
 
 ---
 
 ## 🚧 Current Status
+🚨 MCP Server – Issues Encountered in Claude Desktop
 
-Claude temporarily unavailable — API disruptions observed.
-<img width="867" height="688" alt="image" src="https://github.com/user-attachments/assets/5be001da-2176-4770-8c0c-11ee3a6cd3c7" />
+Claude loaded the wrong file path → Because the manifest was invalid, Claude ignored the extension and tried to load dist/server.js from its own install directory.
 
+Manifest name invalid → Hyphens in "name": "mieaa-mcp" caused Claude to silently reject the manifest.
+
+Server exited immediately → Due to Claude not running the actual dist/server.js inside the .dxt.
+
+Old broken installs cached → Required uninstall + restart before reinstalling the fixed .dxt.
+
+Packaging was correct → ZIP structure was fine; only the manifest caused failures.
+
+Fix → Rename to "name": "mieaa.mcp" and keep "entry_point": "dist/server.js" → Claude loads correctly.
 ---
