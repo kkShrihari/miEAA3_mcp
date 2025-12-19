@@ -28,16 +28,23 @@ miEAA3_mcp/
 ├── package-lock.json
 ├── tsconfig.json
 ├── dist/
-│   └── server.js
+│ ├── server.js
+│ └── handlers/
+│ ├── mieaa_categories_handler.js
+│ ├── mieaa_mirna_precursor_converter_handler.js
+│ ├── mieaa_mirbase_converter_handler.js
+│ └── over_representation_analysis_handler.js
 ├── src/
-│   ├── server.ts
-│   ├── handlers/
-│   │   ├── mieaa_categories_handler.ts
-│   │   ├── mieaa_mirna_precursor_converter_handler.ts
-│   │   ├── mieaa_mirbase_converter_handler.ts
-│   │   └── over_representation_analysis_handler.ts
-│   └── utils/
-│       └── mieaa.ts
+│ ├── server.ts
+│ ├── handlers/
+│ │ ├── mieaa_categories_handler.ts
+│ │ ├── mieaa_mirna_precursor_converter_handler.ts
+│ │ ├── mieaa_mirbase_converter_handler.ts
+│ │ └── over_representation_analysis_handler.ts
+│ └── utils/
+│ └── mieaa.ts
+├── test.mjs
+└── miEAA3_mcp.dxt
 ```
 
 ---
@@ -139,6 +146,44 @@ For protocol-level inspection and debugging:
 npm install @modelcontextprotocol/inspector --save-dev
 npx @modelcontextprotocol/inspector
 ```
+
+- Install prerequisites: Node.js ≥ 18, npm, and Claude Desktop
+- Clone or open the `miEAA3_mcp` project directory
+- Install dependencies:
+  
+  ```bash
+  npm install
+  
+Build the MCP server into a single ESM file:
+# Linux / WSL
+npx esbuild src/server.ts \
+  --bundle \
+  --platform=node \
+  --format=esm \
+  --target=node18 \
+  --outfile=dist/server.js
+powershell
+Copy code
+# Windows (PowerShell)
+npx esbuild src/server.ts `
+  --bundle `
+  --platform=node `
+  --format=esm `
+  --target=node18 `
+  --outfile=dist/server.js
+  
+Create the Claude extension package (.dxt) or use existing one in git:
+zip -r miEAA3_mcp.dxt \
+  manifest.json \
+  package.json \
+  package-lock.json \
+  tsconfig.json \
+  dist \
+  -x "*.ts" "*.map" "*.log"
+  
+Open Claude Desktop → Settings → Advanced → Install Extension
+Select the generated miEAA3_mcp.dxt file (from windows)
+Open a new Claude chat and use the miEAA tools directly (no manual server start required)
 
 ---
 
