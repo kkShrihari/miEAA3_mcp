@@ -155,26 +155,28 @@ npx @modelcontextprotocol/inspector
 
   ```bash
   npm install
+  ```
   
 ### Build the MCP server into a single ESM file:
-Linux / WSL
+```Linux / WSL
 npx esbuild src/server.ts \
   --bundle \
   --platform=node \
   --format=esm \
   --target=node18 \
   --outfile=dist/server.js
-
-Windows (PowerShell)
+```
+```Windows (PowerShell)
 npx esbuild src/server.ts `
   --bundle `
   --platform=node `
   --format=esm `
   --target=node18 `
   --outfile=dist/server.js
-  
+ ``` 
 ### Create the Claude extension package (.dxt)
 (or use the existing .dxt file from the repository):
+```Bash
 zip -r miEAA3_mcp.dxt \
   manifest.json \
   package.json \
@@ -182,11 +184,12 @@ zip -r miEAA3_mcp.dxt \
   tsconfig.json \
   dist \
   -x "*.ts" "*.map" "*.log"
-  
+```
 Open Claude Desktop → Settings → Advanced → Install Extension
 Select the miEAA3_mcp.dxt file (from your Windows or local folder)
 Open a new Claude chat and use the miEAA tools directly
 (no manual server start required)
+
 ---
 
 ## Current Issue
