@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "MCP server for miEAA enrichment analysis",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "bin": {
-    "mieaa-mcp-server": "dist/index.js"
+    "mieaa-mcp-server": "dist/server.js"
   },
   "files": [
     "dist",
@@ -18,8 +18,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "dev": "ts-node src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "ts-node src/server.ts",
+    "start": "node dist/server.js",
     "clean": "rimraf dist",
     "prepare": "npm run build"
   },

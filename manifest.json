@@ -1,9 +1,9 @@
 {
-  "manifest_version": "0.3",
-  "name": "mieaa3_mcp",
-  "display_name": "miEAA 3.0 MCP",
+  "manifest_version": "0.2",
+  "name": "mieaa.mcp",
+  "display_name": "miEAA-MCP",
   "version": "1.0.0",
-  "description": "Runs miEAA 3.0 enrichment analysis (ORA/GSEA) for miRNAs or precursors.",
+  "description": "miEAA 3.0 MCP server for miRNA and precursor enrichment analysis, category discovery, converters, and job monitoring.",
   "author": {
     "name": "Shrihari Kamalan Kumarguruparan"
   },
@@ -13,44 +13,26 @@
     "entry_point": "dist/server.js",
     "mcp_config": {
       "command": "node",
-      "args": ["dist/server.js"]
+      "args": ["${__dirname}/dist/server.js"]
     }
   },
 
   "tools": [
     {
-      "name": "mirna_analysis",
-      "description": "Run miEAA ORA/GSEA analysis for miRNAs.",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "species": { "type": "string" },
-          "analysis_type": { "type": "string", "enum": ["ORA", "GSEA"] },
-          "mirnas": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "category_selection": { "type": "string" }
-        },
-        "required": ["species", "analysis_type", "mirnas"]
-      }
+      "name": "over_representation_analysis",
+      "description": "Run miEAA over-representation analysis (ORA) for miRNAs or precursors across supported species."
     },
     {
-      "name": "precursor_analysis",
-      "description": "Run miEAA ORA/GSEA analysis for miRNA precursors.",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "species": { "type": "string" },
-          "analysis_type": { "type": "string", "enum": ["ORA", "GSEA"] },
-          "precursors": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "category_selection": { "type": "string" }
-        },
-        "required": ["species", "analysis_type", "precursors"]
-      }
+      "name": "list_enrichment_categories",
+      "description": "List available miEAA enrichment categories for a species and entity type (miRNA or precursor)."
+    },
+    {
+      "name": "mirna_precursor_converter",
+      "description": "Convert between miRNA names and precursor names using miEAA utilities."
+    },
+    {
+      "name": "mirbase_version_converter",
+      "description": "Convert miRNA identifiers between different miRBase versions."
     }
   ],
 
@@ -58,7 +40,7 @@
 
   "compatibility": {
     "claude_desktop": ">=1.0.0",
-    "platforms": ["win32", "darwin", "linux"],
+    "platforms": ["win32", "linux", "darwin"],
     "runtimes": {
       "node": ">=18.0.0"
     }

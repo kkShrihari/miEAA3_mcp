@@ -1,4 +1,4 @@
-// // src/handlers/mieaa_mirna_handler.ts
+// // src/handlers/over_representation_analysis.ts
 // import {
 //   startMiEAAJob,
 //   fetchMiEAACategories,
@@ -6,30 +6,40 @@
 //   MiEAAError,
 //   MiEAAStartResponse
 // } from "../utils/mieaa.js";
-// export class MiEAAMirnaHandler {
+// type Entity = "mirna" | "precursor";
+// interface ORAOptions {
+//   species: string;
+//   entity: Entity;
+//   ids: string[];
+//   category_selection?: string;
+//   categories?: string[];
+//   reference_set?: string[];
+//   p_adjust?: string;
+//   p_scope?: string;
+//   alpha?: number;
+//   min_hits?: number;
+// }
+// export class OverRepresentationAnalysisHandler {
 //   // -----------------------------------------------------
 //   // VALIDATION
 //   // -----------------------------------------------------
-//   validate(options: any): string | null {
-//     if (!options.mirnas || !Array.isArray(options.mirnas) || options.mirnas.length === 0) {
-//       return "mirnas must be a non-empty array";
-//     }
-//     if (!["ORA", "GSEA"].includes(options.analysis_type)) {
-//       return "analysis_type must be ORA or GSEA";
-//     }
+//   validate(options: ORAOptions): string | null {
 //     if (!options.species) {
 //       return "species is required";
+//     }
+//     if (!["mirna", "precursor"].includes(options.entity)) {
+//       return "entity must be 'mirna' or 'precursor'";
+//     }
+//     if (!options.ids || !Array.isArray(options.ids) || options.ids.length === 0) {
+//       return "ids must be a non-empty array";
 //     }
 //     return null;
 //   }
 //   // -----------------------------------------------------
-//   // BUILD POST BODY FOR MI-EAA
+//   // BUILD POST BODY (ORA ONLY)
 //   // -----------------------------------------------------
-//   buildBody(options: any): any {
-//     const testset =
-//       options.analysis_type === "ORA"
-//         ? options.mirnas.join(",")
-//         : options.mirnas.map((m: string) => `${m}:1.0`).join(",");
+//   buildBody(options: ORAOptions): any {
+//     const testset = options.ids.join(",");
 //     return {
 //       testset,
 //       categories: options.categories,
@@ -41,7 +51,7 @@
 //     };
 //   }
 //   // -----------------------------------------------------
-//   // PARSE CATEGORY SELECTION (numbers or "all")
+//   // PARSE CATEGORY SELECTION
 //   // -----------------------------------------------------
 //   parseCategorySelection(selection: string, categories: string[]): string[] {
 //     if (!selection || selection === "all") {
@@ -51,14 +61,12 @@
 //     const parts = selection.split(",");
 //     for (let p of parts) {
 //       p = p.trim();
-//       // Range: 3–6
 //       if (p.includes("-")) {
 //         const [start, end] = p.split("-").map(n => parseInt(n.trim()));
 //         for (let i = start; i <= end; i++) {
 //           if (categories[i - 1]) chosen.add(categories[i - 1]);
 //         }
 //       } else {
-//         // Single number
 //         const num = parseInt(p);
 //         if (!isNaN(num) && categories[num - 1]) {
 //           chosen.add(categories[num - 1]);
@@ -68,75 +76,71 @@
 //     return Array.from(chosen);
 //   }
 //   // -----------------------------------------------------
-//   // MAIN ANALYSIS EXECUTION
+//   // MAIN EXECUTION
 //   // -----------------------------------------------------
-//   async runAnalysis(options: any): Promise<any | MiEAAError> {
-//     // Validate input
+//   async run(options: ORAOptions): Promise<any | MiEAAError> {
+//     // Validate
 //     const validationError = this.validate(options);
-//     if (validationError) return { success: false, error: validationError };
-//     // Fetch categories automatically if none provided
-//     if (!options.categories || options.categories.length === 0) {
-//       console.log("🔍 Fetching miRNA categories automatically...");
-//       const catResult = await fetchMiEAACategories(options.species, "mirna");
-//       if ("error" in catResult) return catResult;
-//       const { ids, map } = catResult;
-//       console.log("\n📌 Available Categories:");
-//       Object.entries(map).forEach(([num, name]) => {
-//         console.log(` ${num}. ${name}`);
-//       });
-//       options.categories = ids;
+//     if (validationError) {
+//       return { success: false, error: validationError };
 //     }
-//     // Apply user selection (numbers, ranges)
-//     const selectedCategories = this.parseCategorySelection(
+//     // Auto-fetch categories if needed
+//     if (!options.categories || options.categories.length === 0) {
+//       const catRes = await fetchMiEAACategories(
+//         options.species,
+//         options.entity
+//       );
+//       if ("error" in catRes) return catRes;
+//       options.categories = catRes.ids;
+//     }
+//     // Apply numeric category selection
+//     options.categories = this.parseCategorySelection(
 //       options.category_selection ?? "all",
 //       options.categories
 //     );
-//     // Restrict POST body to selected categories only
-//     options.categories = selectedCategories;
-//     // Build request body
+//     // Build ORA body
 //     const body = this.buildBody(options);
-//     // Start analysis job
+//     // Start ORA job (analysis_type is FIXED to ORA)
 //     const startJob: MiEAAStartResponse = await startMiEAAJob(
 //       body,
 //       options.species,
-//       "mirna",
-//       options.analysis_type
+//       options.entity,
+//       "ORA"
 //     );
 //     if ("error" in startJob) return startJob;
 //     const jobId = startJob.job_id;
-//     console.log("🆔 Job ID =", jobId);
-//     console.log("🔗 Results:", 
-//       `https://ccb-compute2.cs.uni-saarland.de/mieaa/api/v1/enrichment_analysis/results/${jobId}/`
+//     // Log metadata to stderr (MCP-safe)
+//     console.error(`ORA job started: ${jobId}`);
+//     console.error(
+//       `Result URL: https://ccb-compute2.cs.uni-saarland.de/mieaa/api/v1/enrichment_analysis/results/${jobId}/`
 //     );
-//     // Fetch results (utils now always returns top 10)
+//     // Fetch & return final ORA results
 //     return await fetchMiEAAResults(jobId);
 //   }
 // }
-// src/handlers/mieaa_mirna_handler.ts
+// src/handlers/over_representation_analysis.ts
 import { startMiEAAJob, fetchMiEAACategories, fetchMiEAAResults } from "../utils/mieaa.js";
-export class MiEAAMirnaHandler {
+export class OverRepresentationAnalysisHandler {
     // -----------------------------------------------------
     // VALIDATION
     // -----------------------------------------------------
     validate(options) {
-        if (!options.mirnas || !Array.isArray(options.mirnas) || options.mirnas.length === 0) {
-            return "mirnas must be a non-empty array";
-        }
-        if (!["ORA", "GSEA"].includes(options.analysis_type)) {
-            return "analysis_type must be ORA or GSEA";
-        }
         if (!options.species) {
             return "species is required";
+        }
+        if (!["mirna", "precursor"].includes(options.entity)) {
+            return "entity must be 'mirna' or 'precursor'";
+        }
+        if (!options.ids || !Array.isArray(options.ids) || options.ids.length === 0) {
+            return "ids must be a non-empty array";
         }
         return null;
     }
     // -----------------------------------------------------
-    // BUILD POST BODY
+    // BUILD POST BODY (ORA ONLY)
     // -----------------------------------------------------
     buildBody(options) {
-        const testset = options.analysis_type === "ORA"
-            ? options.mirnas.join(",")
-            : options.mirnas.map((m) => `${m}:1.0`).join(",");
+        const testset = options.ids.join(",");
         return {
             testset,
             categories: options.categories,
@@ -177,34 +181,72 @@ export class MiEAAMirnaHandler {
     // -----------------------------------------------------
     // MAIN EXECUTION
     // -----------------------------------------------------
-    async runAnalysis(options) {
+    async run(options) {
         // Validate
         const validationError = this.validate(options);
-        if (validationError)
-            return { success: false, error: validationError };
-        // Auto-load categories
-        if (!options.categories || options.categories.length === 0) {
-            const catResult = await fetchMiEAACategories(options.species, "mirna");
-            if ("error" in catResult)
-                return catResult;
-            const { ids } = catResult;
-            options.categories = ids;
+        if (validationError) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify({ success: false, error: validationError })
+                    }
+                ],
+                structuredContent: {
+                    success: false,
+                    error: validationError
+                }
+            };
         }
-        // Numerically reduce categories
-        const selectedCategories = this.parseCategorySelection(options.category_selection ?? "all", options.categories);
-        options.categories = selectedCategories;
-        // Build POST body
+        // Auto-fetch categories if needed
+        if (!options.categories || options.categories.length === 0) {
+            const catRes = await fetchMiEAACategories(options.species, options.entity);
+            if ("error" in catRes) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(catRes)
+                        }
+                    ],
+                    structuredContent: catRes
+                };
+            }
+            options.categories = catRes.ids;
+        }
+        // Apply numeric category selection
+        options.categories = this.parseCategorySelection(options.category_selection ?? "all", options.categories);
+        // Build ORA body
         const body = this.buildBody(options);
-        // Start job
-        const startJob = await startMiEAAJob(body, options.species, "mirna", options.analysis_type);
-        if ("error" in startJob)
-            return startJob;
+        // Start ORA job (analysis_type is FIXED to ORA)
+        const startJob = await startMiEAAJob(body, options.species, options.entity, "ORA");
+        if ("error" in startJob) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: JSON.stringify(startJob)
+                    }
+                ],
+                structuredContent: startJob
+            };
+        }
         const jobId = startJob.job_id;
-        // Log job metadata only to stderr (safe for MCP)
-        console.error(`Job started: ${jobId}`);
+        // Log metadata to stderr (MCP-safe)
+        console.error(`ORA job started: ${jobId}`);
         console.error(`Result URL: https://ccb-compute2.cs.uni-saarland.de/mieaa/api/v1/enrichment_analysis/results/${jobId}/`);
-        // Retrieve final results
-        return await fetchMiEAAResults(jobId);
+        // Fetch final ORA results
+        const results = await fetchMiEAAResults(jobId);
+        // Final MCP-compliant return
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify(results)
+                }
+            ],
+            structuredContent: results
+        };
     }
 }
-//# sourceMappingURL=mieaa_mirna_handler.js.map
+//# sourceMappingURL=over_representation_analysis_handler.js.map

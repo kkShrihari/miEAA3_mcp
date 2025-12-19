@@ -1,145 +1,36 @@
-// #!/usr/bin/env node
+// ------------------------------------------------------
+//  FORCE EXTENSION ROOT AS WORKING DIRECTORY
+// ------------------------------------------------------
+import path from "path";
+import { fileURLToPath } from "url";
 
-// import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-// import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-// import {
-//   CallToolRequestSchema,
-//   ListToolsRequestSchema,
-// } from "@modelcontextprotocol/sdk/types.js";
+// Resolve the absolute path of this file (dist/server.js)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// import { MiEAAMirnaHandler } from "./handlers/mieaa_mirna_handler.js";
-// import { MiEAAPrecursorHandler } from "./handlers/mieaa_precursor_handler.js";
+// Force Node to treat /dist as current working directory
+process.chdir(__dirname);
 
-// // -----------------------------
-// // Instantiate tools
-// // -----------------------------
-// const mirnaTool = new MiEAAMirnaHandler();
-// const precursorTool = new MiEAAPrecursorHandler();
 
-// // -----------------------------
-// // MCP SERVER
-// // -----------------------------
-// const server = new Server(
-//   {
-//     name: "miEAA3_mcp",
-//     version: "1.0.0",
-//   },
-//   {
-//     capabilities: {
-//       tools: {},
-//     },
-//   }
-// );
+import { MiEAACategoriesHandler } from "./handlers/mieaa_categories_handler.js";
+import { MiEAAMirnaPrecursorConverterHandler } from "./handlers/mieaa_mirna_precursor_converter_handler.js";
+import { MiEAAMirBaseConverterHandler } from "./handlers/mieaa_mirbase_converter_handler.js";
+import { OverRepresentationAnalysisHandler } from "./handlers/over_representation_analysis_handler.js";
 
-// // -----------------------------
-// // TOOL LISTING
-// // -----------------------------
-// server.setRequestHandler(ListToolsRequestSchema, async () => {
-//   return {
-//     tools: [
-//       {
-//         name: "mieaa_mirna",
-//         description: "Run miRNA ORA or GSEA enrichment using miEAA API.",
-//         inputSchema: {
-//           type: "object",
-//           properties: {
-//             species: { type: "string" },
-//             analysis_type: { type: "string", enum: ["ORA", "GSEA"] },
-//             mirnas: { type: "array", items: { type: "string" } },
-//             category_selection: { type: "string" },
-//             reference_set: { type: "array", items: { type: "string" } },
-//             p_adjust: { type: "string" },
-//             p_scope: { type: "string" },
-//             alpha: { type: "number" },
-//             min_hits: { type: "number" },
-//           },
-//           required: ["species", "analysis_type", "mirnas"],
-//         },
-//       },
+console.error(">>> RUNNING dist/server.js <<<");
 
-//       {
-//         name: "mieaa_precursor",
-//         description: "Run precursor ORA or GSEA enrichment using miEAA API.",
-//         inputSchema: {
-//           type: "object",
-//           properties: {
-//             species: { type: "string" },
-//             analysis_type: { type: "string", enum: ["ORA", "GSEA"] },
-//             precursors: { type: "array", items: { type: "string" } },
-//             category_selection: { type: "string" },
-//             reference_set: { type: "array", items: { type: "string" } },
-//             p_adjust: { type: "string" },
-//             p_scope: { type: "string" },
-//             alpha: { type: "number" },
-//             min_hits: { type: "number" },
-//           },
-//           required: ["species", "analysis_type", "precursors"],
-//         },
-//       },
-//     ],
-//   };
-// });
+//------------------------------------------------------
+// ERROR HANDLING
+//------------------------------------------------------
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
+});
 
-// // -----------------------------
-// // TOOL EXECUTION
-// // -----------------------------
-// server.setRequestHandler(CallToolRequestSchema, async (request) => {
-//   const { name, arguments: args } = request.params;
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION:", err);
+});
 
-//   try {
-//     switch (name) {
-//       case "mieaa_mirna":
-//         return await mirnaTool.runAnalysis(args);
-
-//       case "mieaa_precursor":
-//         return await precursorTool.runAnalysis(args);
-
-//       default:
-//         throw new Error(`Unknown tool: ${name}`);
-//     }
-//   } catch (err: any) {
-//     return {
-//       isError: true,
-//       content: [
-//         {
-//           type: "text",
-//           text: `❌ MCP Tool error: ${err?.message || err}`,
-//         },
-//       ],
-//     };
-//   }
-// });
-
-// // -----------------------------
-// // SERVER START
-// // -----------------------------
-// async function main() {
-//   const transport = new StdioServerTransport();
-//   await server.connect(transport);
-//   console.error("🚀 miEAA MCP server running (stdio mode)");
-// }
-
-// // ESM direct-run check
-// import { fileURLToPath } from "url";
-// const __filename = fileURLToPath(import.meta.url);
-
-// if (process.argv[1] === __filename) {
-//   main().catch((err) => {
-//     console.error("Fatal server error:", err);
-//     process.exit(1);
-//   });
-// }
-
-// // Graceful shutdown
-// process.on("SIGINT", () => {
-//   console.error("👋 Shutting down miEAA MCP server...");
-//   process.exit(0);
-// });
-// process.on("SIGTERM", () => {
-//   console.error("👋 Shutting down miEAA MCP server...");
-//   process.exit(0);
-// });
-
+console.error("SERVER ENTRY REACHED");
 
 //------------------------------------------------------
 // MCP SERVER BOOTSTRAP
@@ -149,19 +40,19 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  InitializeRequestSchema
 } from "@modelcontextprotocol/sdk/types.js";
-
-import { MiEAAMirnaHandler } from "./handlers/mieaa_mirna_handler.js";
-import { MiEAAPrecursorHandler } from "./handlers/mieaa_precursor_handler.js";
 
 //------------------------------------------------------
 // Instantiate tool handlers
 //------------------------------------------------------
-const mirnaTool = new MiEAAMirnaHandler();
-const precursorTool = new MiEAAPrecursorHandler();
+const oraTool = new OverRepresentationAnalysisHandler();
+const categoryTool = new MiEAACategoriesHandler();
+const mirnaPrecursorTool = new MiEAAMirnaPrecursorConverterHandler();
+const mirbaseTool = new MiEAAMirBaseConverterHandler();
 
 //------------------------------------------------------
-// MCP SERVER DECLARATION
+// CREATE MCP SERVER INSTANCE
 //------------------------------------------------------
 const server = new Server(
   {
@@ -171,9 +62,31 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      sampling: {},
+      roots: {},
     },
   }
 );
+
+//------------------------------------------------------
+// INITIALIZE
+//------------------------------------------------------
+server.setRequestHandler(InitializeRequestSchema, async () => {
+  console.error("Initialize handler invoked");
+
+  return {
+    protocolVersion: "2025-06-18",
+    serverInfo: {
+      name: "miEAA3_mcp",
+      version: "1.0.0",
+    },
+    capabilities: {
+      tools: { list: true, call: true },
+      sampling: {},
+      roots: {},
+    }
+  };
+});
 
 //------------------------------------------------------
 // TOOL LIST
@@ -181,15 +94,19 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
+
+      // -------------------------------------------------
+      // TOOL 1 — OVER-REPRESENTATION ANALYSIS (ORA)
+      // -------------------------------------------------
       {
-        name: "mieaa_mirna",
-        description: "Run miRNA ORA or GSEA enrichment using the miEAA API.",
+        name: "over_representation_analysis",
+        description: "Run miEAA over-representation analysis (ORA) for miRNA or precursor.",
         inputSchema: {
           type: "object",
           properties: {
             species: { type: "string" },
-            analysis_type: { type: "string", enum: ["ORA", "GSEA"] },
-            mirnas: { type: "array", items: { type: "string" } },
+            entity: { type: "string", enum: ["mirna", "precursor"] },
+            ids: { type: "array", items: { type: "string" } },
             category_selection: { type: "string" },
             reference_set: { type: "array", items: { type: "string" } },
             p_adjust: { type: "string" },
@@ -197,58 +114,128 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             alpha: { type: "number" },
             min_hits: { type: "number" }
           },
-          required: ["species", "analysis_type", "mirnas"],
-        },
+          required: ["species", "entity", "ids"]
+        }
       },
 
+      // -------------------------------------------------
+      // LIST ENRICHMENT CATEGORIES
+      // -------------------------------------------------
       {
-        name: "mieaa_precursor",
-        description: "Run precursor ORA enrichment using the miEAA API.",
+        name: "list_enrichment_categories",
+        description: "List available miEAA enrichment categories for a species.",
         inputSchema: {
           type: "object",
           properties: {
             species: { type: "string" },
-            analysis_type: { type: "string", enum: ["ORA", "GSEA"] },
-            precursors: { type: "array", items: { type: "string" } },
-            category_selection: { type: "string" },
-            reference_set: { type: "array", items: { type: "string" } },
-            p_adjust: { type: "string" },
-            p_scope: { type: "string" },
-            alpha: { type: "number" },
-            min_hits: { type: "number" }
+            entity: { type: "string", enum: ["mirna", "precursor"] }
           },
-          required: ["species", "analysis_type", "precursors"],
-        },
+          required: ["species", "entity"]
+        }
       },
-    ],
+
+      // -------------------------------------------------
+      // miRNA ↔ PRECURSOR CONVERTER
+      // -------------------------------------------------
+      {
+        name: "mirna_precursor_converter",
+        description: "Convert between miRNA names and precursor names.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            input: { type: "array", items: { type: "string" } },
+            direction: {
+              type: "string",
+              enum: ["mirna_to_precursor", "precursor_to_mirna"]
+            }
+          },
+          required: ["input", "direction"]
+        }
+      },
+
+      // -------------------------------------------------
+      // miRBASE VERSION CONVERTER
+      // -------------------------------------------------
+      {
+        name: "mirbase_version_converter",
+        description: "Convert miRNA identifiers between miRBase versions.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            mirnas: { type: "array", items: { type: "string" } },
+            source_version: { type: "string" },
+            target_version: { type: "string" }
+          },
+          required: ["mirnas", "source_version", "target_version"]
+        }
+      }
+    ]
   };
 });
 
 //------------------------------------------------------
-// TOOL EXECUTION HANDLER
+// TOOL EXECUTION ROUTER
 //------------------------------------------------------
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
-  const { name, arguments: args } = req.params;
+  const { name, arguments: args } = req.params as {
+    name: string;
+    arguments: Record<string, unknown>;
+  };
 
   try {
-    if (name === "mieaa_mirna") {
-      return await mirnaTool.runAnalysis(args);
+    if (!args || typeof args !== "object") {
+      throw new Error("Tool arguments are required");
     }
 
-    if (name === "mieaa_precursor") {
-      return await precursorTool.runAnalysis(args);
+    // --------------------------------------------------
+    // ORA TOOL
+    // --------------------------------------------------
+    if (name === "over_representation_analysis") {
+      return await oraTool.run(args as any);
+    }
+
+    // --------------------------------------------------
+    // CATEGORY LIST
+    // --------------------------------------------------
+    if (name === "list_enrichment_categories") {
+      return await categoryTool.run(args as {
+        species: string;
+        entity: "mirna" | "precursor";
+      });
+    }
+
+    // --------------------------------------------------
+    // miRNA ↔ PRECURSOR CONVERTER
+    // --------------------------------------------------
+    if (name === "mirna_precursor_converter") {
+      return await mirnaPrecursorTool.run({
+        ids: (args as any).input,
+        direction: (args as any).direction
+      });
+    }
+
+    // --------------------------------------------------
+    // miRBASE VERSION CONVERTER
+    // --------------------------------------------------
+    if (name === "mirbase_version_converter") {
+      return await mirbaseTool.run({
+        mirnas: (args as any).mirnas,
+        from_version: (args as any).source_version,
+        to_version: (args as any).target_version
+      });
     }
 
     throw new Error(`Unknown tool: ${name}`);
+
   } catch (err: any) {
     return {
       isError: true,
       content: [
         {
           type: "text",
-          text: `MCP Tool Error: ${err?.message || String(err)}`,
-        },
-      ],
+          text: `MCP Tool Error: ${err.message || String(err)}`
+        }
+      ]
     };
   }
 });
@@ -259,28 +246,12 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("miEAA MCP server started");
+  console.error("MCP server connected");
 }
 
-// Allow direct execution (node dist/server.js)
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-if (process.argv[1] === __filename) {
-  main().catch((err) => {
-    console.error("Fatal server error:", err);
-    process.exit(1);
-  });
-}
-
-//------------------------------------------------------
-// GRACEFUL SHUTDOWN
-//------------------------------------------------------
-process.on("SIGINT", () => {
-  console.error("Server shutdown: SIGINT");
-  process.exit(0);
+main().catch(err => {
+  console.error("FATAL:", err);
 });
 
-process.on("SIGTERM", () => {
-  console.error("Server shutdown: SIGTERM");
-  process.exit(0);
-});
+// KEEP NODE ALIVE
+setInterval(() => {}, 1 << 30);
