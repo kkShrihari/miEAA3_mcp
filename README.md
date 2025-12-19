@@ -142,25 +142,9 @@ npx @modelcontextprotocol/inspector
 
 ---
 
-## Current Known Issue (Claude Tool Response Format)
+## Current Issue
+At the moment, I am refining the result formatting, so the outputs are more structured and easier to use by user, while remaining MCP-compatible. The miEAA server was temporarily down during testing, but I expect to complete this today once it is reachable again.
 
-Although the MCP server is correctly installed and accepted by Claude Desktop, there is a known issue with the following tool:
-
-**Tool:** `list_enrichment_categories`
-
-Claude reports:
-
-> “It seems there's an issue with the tool response format. The miEAA tool is available but appears to be having technical difficulties returning the enrichment categories at the moment.”
-
-### Explanation
-
-- The miEAA API response is valid JSON
-- The same handler works correctly in a local Node.js environment
-- The issue occurs due to **Claude MCP runtime constraints on tool response formats**
+One issue I encountered is that GSEA analysis has API endpoints but expects a different input format that is not documented on the miEAA website, which currently prevents successful execution. All other API-based tools are working as expected.
 
 ---
-<img width="1180" height="656" alt="image" src="https://github.com/user-attachments/assets/dfeb4fc1-ae69-4fb5-a268-2588e7031b35" />
-<img width="1165" height="450" alt="image" src="https://github.com/user-attachments/assets/4fcc3782-6892-401b-a616-2a528ce48ff3" />
-<img width="969" height="657" alt="image" src="https://github.com/user-attachments/assets/ab360074-8887-4fae-9e20-557c0e5a4f99" />
-<img width="1016" height="555" alt="image" src="https://github.com/user-attachments/assets/373d2af9-7814-4fa1-8ead-d43a319458d1" />
-
