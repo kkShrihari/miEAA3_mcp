@@ -185,10 +185,10 @@ zip -r miEAA3_mcp.dxt \
   dist \
   -x "*.ts" "*.map" "*.log"
 ```
-Open Claude Desktop → Settings → Advanced → Install Extension
-Select the miEAA3_mcp.dxt file (from your Windows or local folder)
-Open a new Claude chat and use the miEAA tools directly
-(no manual server start required)
+-Open Claude Desktop → Settings → Advanced → Install Extension
+-Select the miEAA3_mcp.dxt file (from your Windows or local folder)
+-Open a new Claude chat and use the miEAA tools directly
+-(no manual server start required)
 
 ---
 
